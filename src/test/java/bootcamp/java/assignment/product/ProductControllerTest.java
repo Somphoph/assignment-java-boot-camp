@@ -1,5 +1,6 @@
 package bootcamp.java.assignment.product;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -24,15 +26,35 @@ class ProductControllerTest {
     @MockBean
     private ProductRepository productRepository;
 
+    List<Product> products;
+
+    @BeforeEach
+    void beforeTest() {
+        products = new ArrayList<>();
+        products.add(new Product(1, "จอคอม AOC 24G2E 23.8\" IPS Gaming Monitor 144Hz", "AOC", 7990.0, 6990.0, 2, new Date(), 1000, 3));
+        products.add(new Product(2, "จอคอม Dell Alienware 25 AW2521H 24.5\" IPS Gaming Monitor 360Hz", "Dell", 28990.0, 28990.0, 0, null, 0, 5));
+        products.add(new Product(3, "LG Monitor Gaming 34\" รุ่น 34GL750-B IPS WFHD 144Hz", "LG", 17790, 16290, 8, null, 1500, 4));
+        products.add(new Product(4, "BenQ PD2725U 27นิ้ว 4K 100% sRGB Thunderbolt 3 Graphic Design Monitor (จอคอมงานกราฟฟิค, จอมอนิเตอร์ 4k 27นิ้ว)", "BenQ", 31900, 31900, 0, null, 0, 0));
+        products.add(new Product(5, "SAMSUNG MONITOR LS32AM700UEXXT (4K Smart Monitor)", "Samsung", 9700, 9700, 0, null, 0, 0));
+        products.add(new Product(6, "Dell UltraSharp 43 4K USB-C Monitor U4320Q Monitor 4K UHD 3840 x2160 60Hz Warranty 3 Year 96% sRGB", "Dell", 32390.00, 32390.00, 0, null, 0, 5));
+    }
+
     @Test
     @DisplayName("ค้นหาข้อมูล product ทั้งหมดแล้วจะได้ข้อมูลทั้งหมด")
     void getAllProduct() {
-        List<Product> products = new ArrayList<>();
-        products.add(new Product(1, "จอคอม AOC 24G2E 23.8\" IPS Gaming Monitor 144Hz", "AOC", 7990.0, 6990.0, 2, new Date(), 1000, 3));
-        products.add(new Product(2, "จอคอม Dell Alienware 25 AW2521H 24.5\" IPS Gaming Monitor 360Hz", "Dell", 28990.0, 28990.0, 0, null, 0, 5));
-        products.add(new Product(2, "LG Monitor Gaming 34\" รุ่น 34GL750-B IPS WFHD 144Hz", "LG", 17790, 16290, 8, null, 1500, 4));
         when(productRepository.findAll()).thenReturn(products);
         ResponseEntity<Product[]> resp = testRestTemplate.getForEntity("/products", Product[].class);
+        assertTrue(resp.getStatusCode().is2xxSuccessful());
+        assertEquals(6, Objects.requireNonNull(resp.getBody()).length);
+    }
+
+    @Test
+    @DisplayName("ค้นหาข้อมูล product ด้วยคำว่า 4k จะได้ข้อมูล 3 ชิ้น")
+    void getProductByKeyword() {
+        String keyword = "4k";
+        List<Product> filtered = products.stream().filter(product -> product.getProductName().toLowerCase().contains(keyword)).collect(Collectors.toList());
+        when(productRepository.findByProductNameContainsIgnoreCase(keyword)).thenReturn(filtered);
+        ResponseEntity<Product[]> resp = testRestTemplate.getForEntity("/products?keyword=" + keyword, Product[].class);
         assertTrue(resp.getStatusCode().is2xxSuccessful());
         assertEquals(3, Objects.requireNonNull(resp.getBody()).length);
     }
