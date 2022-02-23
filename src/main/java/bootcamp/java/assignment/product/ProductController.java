@@ -1,9 +1,7 @@
 package bootcamp.java.assignment.product;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import bootcamp.java.assignment.product.exception.ProductNotFoundException;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,5 +18,10 @@ public class ProductController {
     @GetMapping
     public List<Product> getProducts(@RequestParam(required = false) String keyword) {
         return productService.findProducts(keyword);
+    }
+
+    @GetMapping("/{productId}")
+    public Product getProduct(@PathVariable int productId) throws ProductNotFoundException {
+        return productService.findProductById(productId);
     }
 }
