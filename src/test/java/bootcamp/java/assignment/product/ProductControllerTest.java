@@ -7,16 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -44,18 +41,37 @@ class ProductControllerTest {
     void getAllProduct() {
         when(productRepository.findAll()).thenReturn(products);
         ResponseEntity<Product[]> resp = testRestTemplate.getForEntity("/products", Product[].class);
-        assertTrue(resp.getStatusCode().is2xxSuccessful());
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertEquals(6, Objects.requireNonNull(resp.getBody()).length);
     }
 
     @Test
     @DisplayName("ค้นหาข้อมูล product ด้วยคำว่า 4k จะได้ข้อมูล 3 ชิ้น")
-    void getProductByKeyword() {
+    void getProductsByKeyword() {
         String keyword = "4k";
         List<Product> filtered = products.stream().filter(product -> product.getProductName().toLowerCase().contains(keyword)).collect(Collectors.toList());
         when(productRepository.findByProductNameContainsIgnoreCase(keyword)).thenReturn(filtered);
         ResponseEntity<Product[]> resp = testRestTemplate.getForEntity("/products?keyword=" + keyword, Product[].class);
-        assertTrue(resp.getStatusCode().is2xxSuccessful());
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertEquals(3, Objects.requireNonNull(resp.getBody()).length);
+    }
+
+    @Test
+    @DisplayName("ค้นหาข้อมูล product ด้วย Id จะได้ข้อมูลสินค้า 1 ชิ้น")
+    void getProductByProductId() {
+        int id = 1;
+        List<Product> filtered = products.stream().filter(product -> product.getProductId() == id).collect(Collectors.toList());
+        when(productRepository.findById(id)).thenReturn(Optional.of(filtered.get(0)));
+        ResponseEntity<Product> resp = testRestTemplate.getForEntity("/products/" + id, Product.class);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertEquals("จอคอม AOC 24G2E 23.8\" IPS Gaming Monitor 144Hz", Objects.requireNonNull(resp.getBody()).getProductName());
+    }
+
+    @Test
+    @DisplayName("ค้นหาข้อมูลด้วย Id ที่ไม่มีจะได้ HTTP Code 404")
+    void getProductByProductId_whenNotfound_thenError404() {
+        int id = 99;
+        ResponseEntity<Product> resp = testRestTemplate.getForEntity("/products/" + id, Product.class);
+        assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
     }
 }
