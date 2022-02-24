@@ -40,7 +40,7 @@ class ProductControllerTest {
     @DisplayName("ค้นหาข้อมูล product ทั้งหมดแล้วจะได้ข้อมูลทั้งหมด")
     void getAllProduct() {
         when(productRepository.findAll()).thenReturn(products);
-        ResponseEntity<Product[]> resp = testRestTemplate.getForEntity("/products", Product[].class);
+        ResponseEntity<Product[]> resp = testRestTemplate.getForEntity("/api/products", Product[].class);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertEquals(6, Objects.requireNonNull(resp.getBody()).length);
     }
@@ -51,7 +51,7 @@ class ProductControllerTest {
         String keyword = "4k";
         List<Product> filtered = products.stream().filter(product -> product.getProductName().toLowerCase().contains(keyword)).collect(Collectors.toList());
         when(productRepository.findByProductNameContainsIgnoreCase(keyword)).thenReturn(filtered);
-        ResponseEntity<Product[]> resp = testRestTemplate.getForEntity("/products?keyword=" + keyword, Product[].class);
+        ResponseEntity<Product[]> resp = testRestTemplate.getForEntity("/api/products?keyword=" + keyword, Product[].class);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertEquals(3, Objects.requireNonNull(resp.getBody()).length);
     }
@@ -62,7 +62,7 @@ class ProductControllerTest {
         int id = 1;
         List<Product> filtered = products.stream().filter(product -> product.getProductId() == id).collect(Collectors.toList());
         when(productRepository.findById(id)).thenReturn(Optional.of(filtered.get(0)));
-        ResponseEntity<Product> resp = testRestTemplate.getForEntity("/products/" + id, Product.class);
+        ResponseEntity<Product> resp = testRestTemplate.getForEntity("/api/products/" + id, Product.class);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
         assertEquals("จอคอม AOC 24G2E 23.8\" IPS Gaming Monitor 144Hz", Objects.requireNonNull(resp.getBody()).getProductName());
     }
@@ -71,7 +71,7 @@ class ProductControllerTest {
     @DisplayName("ค้นหาข้อมูลด้วย Id ที่ไม่มีจะได้ HTTP Code 404")
     void getProductByProductId_whenNotfound_thenError404() {
         int id = 99;
-        ResponseEntity<Product> resp = testRestTemplate.getForEntity("/products/" + id, Product.class);
+        ResponseEntity<Product> resp = testRestTemplate.getForEntity("/api/products/" + id, Product.class);
         assertEquals(HttpStatus.NOT_FOUND, resp.getStatusCode());
     }
 }
