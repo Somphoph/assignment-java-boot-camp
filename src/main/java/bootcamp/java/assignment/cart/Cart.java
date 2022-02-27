@@ -1,13 +1,17 @@
 package bootcamp.java.assignment.cart;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Set;
 
+@RequiredArgsConstructor
 @AllArgsConstructor
-@NoArgsConstructor
+@Setter
+@Getter
 @Entity
 public class Cart {
     @Id
@@ -16,28 +20,4 @@ public class Cart {
     @OneToMany(mappedBy = "cart")
     private Set<CartItem> items;
     private int userId;
-
-    public int getCartId() {
-        return cartId;
-    }
-
-    public void setCartId(int cartId) {
-        this.cartId = cartId;
-    }
-
-    public Set<CartItem> getItems() {
-        return items;
-    }
-
-    public void setItems(Set<CartItem> items) {
-        this.items = items;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
-
-    public void setUserId(int userId) {
-        this.userId = userId;
-    }
 }
