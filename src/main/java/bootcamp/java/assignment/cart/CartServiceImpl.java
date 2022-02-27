@@ -25,7 +25,6 @@ public class CartServiceImpl implements CartService {
         Cart cart;
         if (optCart.isEmpty()) {
             cart = createNewCart(userId);
-            cart.setItems(new HashSet<>());
         } else {
             cart = optCart.get();
         }
@@ -37,15 +36,24 @@ public class CartServiceImpl implements CartService {
         Product product = optProduct.get();
         item.setProduct(product);
         item.setAmount(amount);
-        item.setTotal(product.getPrice() * amount);
-        item.setPrice(product.getPrice());
         cart.getItems().add(item);
         return cartRepository.save(cart);
+    }
+
+    @Override
+    public Cart findCartByUserId(int userId) {
+        Optional<Cart> optCart = cartRepository.findByUserId(userId);
+        if (optCart.isEmpty()) {
+            return createNewCart(userId);
+        } else {
+            return optCart.get();
+        }
     }
 
     private Cart createNewCart(int userId) {
         Cart cart = new Cart();
         cart.setUserId(userId);
-        return cartRepository.save(cart);
+        cart.setItems(new HashSet<>());
+        return cart;
     }
 }
