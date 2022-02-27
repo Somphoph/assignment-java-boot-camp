@@ -12,9 +12,11 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -39,5 +41,14 @@ class CartControllerTest {
 
         ResponseEntity<DefaultResponse> resp = testRestTemplate.postForEntity("/api/users/" + userId + "/cart", new AddToCartRequest(3, 1), DefaultResponse.class);
         assertEquals(HttpStatus.OK, resp.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("เมื่อดึงข้อมูลตะกร้า จะได้ข้อมูลตะกร้าที่ไม่มีสินค้า")
+    void getCartCase01() {
+        int userId = 99;
+        ResponseEntity<CartResponse> resp = testRestTemplate.getForEntity("/api/users/" + userId + "/cart", CartResponse.class);
+        assertEquals(HttpStatus.OK, resp.getStatusCode());
+        assertTrue(Objects.requireNonNull(resp.getBody()).getItems().isEmpty());
     }
 }
