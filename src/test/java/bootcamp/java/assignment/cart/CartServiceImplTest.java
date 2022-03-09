@@ -43,7 +43,7 @@ class CartServiceImplTest {
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
         Product newProduct = new Product(3, "LG Monitor Gaming 34\" รุ่น 34GL750-B IPS WFHD 144Hz", "LG", 17790, 16290, 8, null, 1500, 4);
         when(productRepository.findById(3)).thenReturn(Optional.of(newProduct));
-        CartService cartService = new CartServiceImpl(cartRepository, productRepository);
+        CartService cartService = new CartService(cartRepository, productRepository);
         Cart result = cartService.add(3, 1, userId);
 
         Assertions.assertEquals(2, result.getItems().size());
@@ -61,7 +61,7 @@ class CartServiceImplTest {
         Cart cart = new Cart(0, items, userId);
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
-        CartService cartService = new CartServiceImpl(cartRepository, productRepository);
+        CartService cartService = new CartService(cartRepository, productRepository);
         Cart result = cartService.add(3, 1, userId);
         Assertions.assertEquals(1, result.getItems().size());
     }
@@ -70,7 +70,7 @@ class CartServiceImplTest {
     @DisplayName("เมื่อเพิ่มสินค้าที่ไม่มีในระบบจะได้ ProductNotFoundException")
     void addCase03() {
         int userId = 99;
-        CartService cartService = new CartServiceImpl(cartRepository, productRepository);
+        CartService cartService = new CartService(cartRepository, productRepository);
         Assertions.assertThrows(ProductNotFoundException.class, () -> cartService.add(555, 1, userId));
     }
 
@@ -78,7 +78,7 @@ class CartServiceImplTest {
     @DisplayName("ค้นหาข้อมูลตะกร้าเมื่อไม่เคยเพิ่มสินค้าเข้าตะกร้ามาก่อน จะได้ข้อมูลตะกร้าเปล่า")
     void findByUserIdCase01() {
         int userId = 99;
-        CartService cartService = new CartServiceImpl(cartRepository, productRepository);
+        CartService cartService = new CartService(cartRepository, productRepository);
         Cart cart = cartService.findCartByUserId(userId);
         Assertions.assertEquals(cart.getUserId(), userId);
         Assertions.assertTrue(cart.getItems().isEmpty());
@@ -96,7 +96,7 @@ class CartServiceImplTest {
         Cart cart = new Cart(0, items, userId);
         when(cartRepository.findByUserId(userId)).thenReturn(Optional.of(cart));
 
-        CartService cartService = new CartServiceImpl(cartRepository, productRepository);
+        CartService cartService = new CartService(cartRepository, productRepository);
         Cart result = cartService.findCartByUserId(userId);
         Assertions.assertEquals(result.getUserId(), userId);
         Assertions.assertFalse(result.getItems().isEmpty());
